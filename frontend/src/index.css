@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* Custom utility classes */
+.btn-primary {
+  background-color: rgb(14 165 233);
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: rgb(2 132 199);
+}
+
+.btn-secondary {
+  background-color: white;
+  color: rgb(55 65 81);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(209 213 219);
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: rgb(249 250 251);
+}
+
+.btn-accent {
+  background-color: rgb(139 92 246);
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-accent:hover {
+  background-color: rgb(124 58 237);
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgb(243 244 246);
+  padding: 1.5rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.5rem;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: rgb(14 165 233);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, rgb(14 165 233), rgb(139 92 246));
+}
+
+.skill-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: rgb(224 242 254);
+  color: rgb(14 165 233);
+  border: 1px solid rgb(147 197 253);
+}
+
+.difficulty-easy {
+  background-color: rgb(220 252 231);
+  color: rgb(21 128 61);
+  border-color: rgb(134 239 172);
+}
+
+.difficulty-medium {
+  background-color: rgb(254 243 199);
+  color: rgb(161 98 7);
+  border-color: rgb(253 230 138);
+}
+
+.difficulty-hard {
+  background-color: rgb(254 226 226);
+  color: rgb(185 28 28);
+  border-color: rgb(252 165 165);
+}
