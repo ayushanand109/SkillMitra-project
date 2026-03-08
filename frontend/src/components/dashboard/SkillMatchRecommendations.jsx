@@ -1,21 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Users, MessageCircle, ArrowRight, Sparkles, Brain } from 'lucide-react';
-import { mockMatches } from '../../data/mockData';
+import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 import { cn, getInitials } from '../../utils/helpers';
+import { useNavigate } from "react-router-dom";
 
 const SkillMatchRecommendations = () => {
+  const { user } = useAuth();
   const [matches, setMatches] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
   const [selectedMatch, setSelectedMatch] = useState(null);
 
   useEffect(() => {
     // Simulate API call to get AI-powered skill matches
-    const fetchMatches = async () => {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setMatches(mockMatches);
-      setIsLoading(false);
-    };
+   const fetchMatches = async () => {
+  try {
+    const token = localStorage.getItem("skillmitra_token");
+
+    const response = await axios.get(
+      "http://localhost:5000/api/users/all",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    // remove logged in user
+    const users = response.data.filter(
+      (u) => u._id !== user._id
+    );
+
+    const formattedMatches = users.map((u) => ({
+      userId: u._id,
+      name: u.name,
+      pseudonym: u.name,
+      avatar: null,
+      compatibilityScore: Math.floor(Math.random() * 30) + 70,
+      canTeach: u.skillsToTeach || [],
+      wantsToLearn: u.skillsToLearn || []
+    }));
+
+    setMatches(formattedMatches);
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+    
 
     fetchMatches();
   }, []);
@@ -71,7 +107,13 @@ const SkillMatchRecommendations = () => {
           <h3 className="text-lg font-semibold text-gray-900">AI Skill Matches</h3>
           <Sparkles className="w-4 h-4 text-accent-500" />
         </div>
-        <span className="text-sm text-gray-500">{matches.length} matches found</span>
+        <div className="flex items-center space-x-3">
+          <span className="text-sm text-gray-500">{matches.length} matches found</span>
+
+          <button className="px-3 py-1 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700">
+            Find Matches
+          </button>
+        </div>      
       </div>
 
       <div className="space-y-4">
@@ -105,10 +147,9 @@ const SkillMatchRecommendations = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h4 className="font-medium text-gray-900 group-hover:text-primary-700 transition-colors">
-                      {match.pseudonym}
+                    <h4 className="font-medium text-gray-900">
+                      {match.name}
                     </h4>
-                    <p className="text-sm text-gray-600">{match.name}</p>
                   </div>
                   
                   {/* Compatibility Score */}
@@ -163,24 +204,26 @@ const SkillMatchRecommendations = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handleConnect(match)}
-                    className="flex items-center space-x-1 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
-                  >
-                    <Users className="w-3 h-3" />
-                    <span>Connect</span>
-                  </button>
-                  
-                  <button className="flex items-center space-x-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200">
-                    <MessageCircle className="w-3 h-3" />
-                    <span>Message</span>
-                  </button>
-                  
-                  <button className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
+                <div className="flex items-center space-x-2 mt-2">
+
+  <button
+    onClick={() => handleConnect(match)}
+    className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg"
+  >
+    <Users className="w-3 h-3" />
+    Connect
+  </button>
+
+<button
+  type="button"
+  onClick={() => navigate(`/chat/${match.userId}`)}
+  className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg"
+>
+  <MessageCircle className="w-3 h-3" />
+  Chat
+</button>
+
+</div>
               </div>
             </div>
           </div>

@@ -20,7 +20,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
   const fetchUser = async () => {
     const token = localStorage.getItem("skillmitra_token");
-    if (!token) return;
+    if (!token) {
+      setIsLoading(false)
+      return;
+    }
 
     try {
       const response = await axios.get(
@@ -33,25 +36,23 @@ export const AuthProvider = ({ children }) => {
       );
 
       setUser(response.data);
+      // save user in localStorage for chat UI
+      localStorage.setItem(
+        "skillmitra_user",
+        JSON.stringify(response.data)
+      );
 
     } catch (error) {
       console.error("Auto-login failed");
       localStorage.removeItem("skillmitra_token");
     }
+    setIsLoading(false);
   };
 
   fetchUser();
 }, []);
 
-  useEffect(() => {
-    // Simulate checking for existing session
-    const token = localStorage.getItem('skillmitra_token');
-    if (token) {
-      // In a real app, you would validate the token with your backend
-      setUser(currentUser);
-    }
-    setIsLoading(false);
-  }, []);
+  
 
   const login = async (email, password) => {
   setIsLoading(true);
@@ -64,6 +65,8 @@ export const AuthProvider = ({ children }) => {
     const { token, user } = response.data;
 
     localStorage.setItem("skillmitra_token", token);
+    localStorage.setItem("skillmitra_user", JSON.stringify(user));
+
     setUser(user);
 
     return { success: true };
@@ -120,11 +123,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('skillmitra_token');
-    setUser(null);
-    setAnonymousMode(false);
-  };
+ const logout = () => {
+  localStorage.removeItem('skillmitra_token');
+  localStorage.removeItem('skillmitra_user');
+  setUser(null);
+  setAnonymousMode(false);
+};
 
   const toggleAnonymousMode = () => {
     setAnonymousMode(prev => !prev);

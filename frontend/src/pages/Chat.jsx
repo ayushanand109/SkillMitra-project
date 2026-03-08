@@ -1,82 +1,159 @@
-import React from 'react';
-import AnonymousChat from '../components/dashboard/AnonymousChat';
+
+import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 const Chat = () => {
+  const { userId } = useParams();
+  const receiverId = userId;
+
+  const [conversationId, setConversationId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
+
+  const bottomRef = useRef(null);
+
+  const token = localStorage.getItem("skillmitra_token");
+
+  useEffect(() => {
+    startConversation();
+  }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const startConversation = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/chat/conversation",
+        { receiverId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setConversationId(res.data._id);
+      fetchMessages(res.data._id);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchMessages = async (id) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/chat/messages/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setMessages(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!text.trim()) return;
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/chat/message",
+        {
+          conversationId,
+          text,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      fetchMessages(conversationId);
+      setText("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const currentUserId = JSON.parse(
+    localStorage.getItem("skillmitra_user")
+  )?.id;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 font-display">
-            Community Chat
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Connect with mentors and learners in our anonymous chat rooms
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main chat */}
-          <div className="lg:col-span-3">
-            <div className="h-[600px]">
-              <AnonymousChat />
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Chat Guidelines */}
-            <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-3">Chat Guidelines</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>• Be respectful and kind</li>
-                <li>• No spam or self-promotion</li>
-                <li>• Help others when you can</li>
-                <li>• Keep discussions skill-related</li>
-                <li>• Report inappropriate behavior</li>
-              </ul>
-            </div>
-
-            {/* Popular Topics */}
-            <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-3">Popular Topics</h3>
-              <div className="space-y-2">
-                {[
-                  { topic: '#react-help', count: 24 },
-                  { topic: '#python-beginners', count: 18 },
-                  { topic: '#career-advice', count: 15 },
-                  { topic: '#project-showcase', count: 12 },
-                  { topic: '#study-groups', count: 9 }
-                ].map((item) => (
-                  <div key={item.topic} className="flex items-center justify-between text-sm">
-                    <span className="text-primary-600 font-medium">{item.topic}</span>
-                    <span className="text-gray-500">{item.count} active</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="card">
-              <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
-              <div className="space-y-2">
-                <button className="w-full btn-primary text-sm py-2">
-                  Find Study Partner
-                </button>
-                <button className="w-full btn-secondary text-sm py-2">
-                  Ask for Help
-                </button>
-                <button className="w-full btn-accent text-sm py-2">
-                  Share Knowledge
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Header */}
+      <div className="bg-white shadow px-6 py-4">
+        <h1 className="text-xl font-semibold text-gray-800">
+          SkillMitra Chat
+        </h1>
       </div>
+
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+
+        {messages.map((msg) => {
+          const isSender = msg.sender._id === currentUserId;
+
+          return (
+            <div
+              key={msg._id}
+              className={`flex ${
+                isSender ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-xs px-4 py-2 rounded-lg text-sm shadow ${
+                  isSender
+                    ? "bg-primary-500 text-white"
+                    : "bg-white text-gray-800"
+                }`}
+              >
+                {!isSender && (
+                  <div className="text-xs font-semibold mb-1">
+                    {msg.sender.name}
+                  </div>
+                )}
+
+                {msg.text}
+              </div>
+            </div>
+          );
+        })}
+
+        <div ref={bottomRef} />
+
+      </div>
+
+      {/* Input Area */}
+      <div className="bg-white border-t p-4 flex gap-3">
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type a message..."
+          className="flex-1 border rounded-lg px-4 py-2 outline-none"
+        />
+
+        <button
+          onClick={sendMessage}
+          className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700"
+        >
+          Send
+        </button>
+      </div>
+
     </div>
   );
 };
 
 export default Chat;
+

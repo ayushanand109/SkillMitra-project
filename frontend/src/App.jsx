@@ -104,14 +104,14 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route 
+            {/* <Route 
               path="/challenges" 
               element={
                 <ProtectedRoute>
                   <Challenges />
                 </ProtectedRoute>
               } 
-            />
+            /> */}
             <Route 
               path="/leaderboard" 
               element={
@@ -121,7 +121,7 @@ function App() {
               } 
             />
             <Route 
-              path="/chat" 
+              path="/chat/:userId" 
               element={
                 <ProtectedRoute>
                   <Chat />

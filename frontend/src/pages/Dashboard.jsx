@@ -1,12 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import SkillMatchRecommendations from '../components/dashboard/SkillMatchRecommendations';
-import ProgressHeatmap from '../components/dashboard/ProgressHeatmap';
 import PeerLeaderboard from '../components/dashboard/PeerLeaderboard';
-import SkillMapNavigator from '../components/dashboard/SkillMapNavigator';
-import AnonymousChat from '../components/dashboard/AnonymousChat';
-import MicroChallenges from '../components/dashboard/MicroChallenges';
-import GamificationDisplay from '../components/dashboard/GamificationDisplay';
 
 const Dashboard = () => {
   const { user, anonymousMode } = useAuth();
@@ -68,25 +63,25 @@ const Dashboard = () => {
             <SkillMatchRecommendations />
             
             {/* Progress Heatmap */}
-            <ProgressHeatmap />
+            
             
             {/* Skill Map Navigator */}
-            <SkillMapNavigator />
+            
             
             {/* Micro Challenges */}
-            <MicroChallenges />
+            
           </div>
 
           {/* Right Column */}
           <div className="space-y-6">
             {/* Gamification Display */}
-            <GamificationDisplay />
+            
             
             {/* Peer Leaderboard */}
             <PeerLeaderboard />
             
             {/* Anonymous Chat */}
-            <AnonymousChat />
+            
           </div>
         </div>
 
