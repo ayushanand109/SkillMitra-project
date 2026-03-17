@@ -20,8 +20,14 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  if (!conversationId) return;
+
+  const interval = setInterval(() => {
+    fetchMessages(conversationId);
+  }, 2000);
+
+  return () => clearInterval(interval);
+}, [conversationId]);
 
   const startConversation = async () => {
     try {
@@ -59,33 +65,40 @@ const Chat = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!text.trim()) return;
+ const sendMessage = async (e) => {
+  e.preventDefault();
 
-    try {
-      await axios.post(
-        "http://localhost:5000/api/chat/message",
-        {
-          conversationId,
-          text,
+  if (!text.trim()) return;
+  if (!conversationId) {
+    console.log("Conversation not ready yet");
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/chat/message",
+      {
+        conversationId,
+        text,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      }
+    );
 
-      fetchMessages(conversationId);
-      setText("");
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    // Add new message instantly to UI
+    setMessages((prev) => [...prev, res.data]);
 
-  const currentUserId = JSON.parse(
-    localStorage.getItem("skillmitra_user")
-  )?.id;
+    setText("");
+  } catch (error) {
+    console.error("Send message error:", error);
+  }
+};
+const storedUser = JSON.parse(localStorage.getItem("skillmitra_user"));
+const currentUserId = storedUser?.id || storedUser?._id;
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -101,7 +114,7 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
 
         {messages.map((msg) => {
-          const isSender = msg.sender._id === currentUserId;
+          const isSender = String(msg.sender._id) === String(currentUserId);
 
           return (
             <div
@@ -113,8 +126,8 @@ const Chat = () => {
               <div
                 className={`max-w-xs px-4 py-2 rounded-lg text-sm shadow ${
                   isSender
-                    ? "bg-primary-500 text-white"
-                    : "bg-white text-gray-800"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray text-gray-900"
                 }`}
               >
                 {!isSender && (
@@ -134,22 +147,24 @@ const Chat = () => {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white border-t p-4 flex gap-3">
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 border rounded-lg px-4 py-2 outline-none"
-        />
+      
+       <form onSubmit={sendMessage} className="bg-white border-t p-4 flex gap-3">
+  <input
+    type="text"
+    value={text}
+    onChange={(e) => setText(e.target.value)}
+    placeholder="Type a message..."
+    className="flex-1 border rounded-lg px-4 py-2 outline-none"
+  />
 
-        <button
-          onClick={sendMessage}
-          className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700"
-        >
-          Send
-        </button>
-      </div>
+  <button
+    type="submit"
+    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+  >
+    Send
+  </button>
+</form>
+      
 
     </div>
   );

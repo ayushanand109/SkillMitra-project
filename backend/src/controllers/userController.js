@@ -3,27 +3,42 @@ import { User } from "../models/User.js";
 // 🔹 MATCHING FUNCTION
 export const getMatches = async (req, res) => {
   try {
-    const currentUserId = req.user.id;
+    const currentUser = await User.findById(req.user.id);
 
-    const currentUser = await User.findById(currentUserId);
+    const users = await User.find({
+      _id: { $ne: req.user.id }
+    });
 
-    if (!currentUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const matches = users.map((user) => {
 
-    const matches = await User.find({
-      _id: { $ne: currentUserId },
-      skillsToTeach: { $in: currentUser.skillsToLearn },
-      skillsToLearn: { $in: currentUser.skillsToTeach }
-    }).select("-password");
+      const teachMatch = user.skillsToTeach.filter(skill =>
+        currentUser.skillsToLearn.includes(skill)
+      );
 
-    res.status(200).json(matches);
+      const learnMatch = user.skillsToLearn.filter(skill =>
+        currentUser.skillsToTeach.includes(skill)
+      );
+
+      const score =
+        (teachMatch.length + learnMatch.length) * 25;
+
+      return {
+        userId: user._id,
+        name: user.name,
+        skillsToTeach: user.skillsToTeach,
+        skillsToLearn: user.skillsToLearn,
+        compatibilityScore: Math.min(score, 100)
+      };
+    });
+
+    matches.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+
+    res.json(matches);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 // 🔹 UPDATE PROFILE FUNCTION
 export const updateProfile = async (req, res) => {
   try {
@@ -39,6 +54,16 @@ export const updateProfile = async (req, res) => {
 
     res.status(200).json(updatedUser);
 
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//get all users
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

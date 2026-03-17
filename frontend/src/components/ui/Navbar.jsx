@@ -30,7 +30,7 @@ const Navbar = () => {
   const navItems = [
     { to: '/dashboard', icon: Home, label: 'Dashboard' },
     { to: '/profile', icon: User, label: 'Profile' },
-    { to: '/challenges', icon: Target, label: 'Challenges' },
+    //{ to: '/challenges', icon: Target, label: 'Challenges' },
     { to: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
     { to: '/chat', icon: MessageSquare, label: 'Chat' },
   ];

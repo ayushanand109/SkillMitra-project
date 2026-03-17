@@ -58,3 +58,16 @@ export const getMessages = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const getConversations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const conversations = await Conversation.find({
+      participants: userId
+    }).populate("participants", "name jobTitle");
+
+    res.json(conversations);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

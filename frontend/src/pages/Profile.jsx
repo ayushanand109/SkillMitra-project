@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import { Edit, Plus, X, Save, User, Briefcase, Trophy, Star } from 'lucide-react';
+import { Edit, Plus, X, Save } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getInitials } from '../utils/helpers';
 
@@ -21,7 +20,6 @@ const Profile = () => {
   const [newSkill, setNewSkill] = useState('');
   const [skillType, setSkillType] = useState('known');
 
-  // Sync form with logged-in user
   useEffect(() => {
     if (user) {
       setFormData({
@@ -50,7 +48,6 @@ const Profile = () => {
 
       updateProfile(response.data);
 
-      // also update localStorage user
       localStorage.setItem(
         "skillmitra_user",
         JSON.stringify(response.data)
@@ -215,7 +212,7 @@ const Profile = () => {
 
             </div>
 
-            {/* Skills to Teach */}
+            {/* Skills I Know */}
             <div className="card">
               <h3 className="font-semibold mb-3">Skills I Know</h3>
 
@@ -228,7 +225,7 @@ const Profile = () => {
                       setNewSkill(e.target.value);
                       setSkillType('known');
                     }}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     className="input-field flex-1"
                   />
 
@@ -264,11 +261,31 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Skills to Learn */}
+            {/* Skills I Want to Learn */}
             <div className="card">
               <h3 className="font-semibold mb-3">
                 Skills I Want to Learn
               </h3>
+
+              {isEditing && (
+                <div className="flex gap-2 mb-3">
+
+                  <input
+                    value={skillType === 'learn' ? newSkill : ''}
+                    onChange={(e) => {
+                      setNewSkill(e.target.value);
+                      setSkillType('learn');
+                    }}
+                    onKeyDown={handleKeyPress}
+                    className="input-field flex-1"
+                  />
+
+                  <button onClick={addSkill} className="btn-primary">
+                    <Plus size={16} />
+                  </button>
+
+                </div>
+              )}
 
               <div className="flex flex-wrap gap-2">
 
@@ -278,9 +295,16 @@ const Profile = () => {
 
                   <div
                     key={skill}
-                    className="px-3 py-1 bg-blue-100 rounded-full"
+                    className="px-3 py-1 bg-blue-100 rounded-full flex items-center gap-1"
                   >
                     {skill}
+
+                    {isEditing && (
+                      <button onClick={() => removeSkill(skill, 'learn')}>
+                        <X size={12} />
+                      </button>
+                    )}
+
                   </div>
 
                 ))}
@@ -299,4 +323,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
