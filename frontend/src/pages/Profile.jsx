@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { getInitials } from '../utils/helpers';
 
 const Profile = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, isLoading } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -110,6 +110,16 @@ const Profile = () => {
       addSkill();
     }
   };
+
+  if (isLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-gray-600">Loading profile...</p>
+    </div>
+  );
+
+   if (!user) return null;
+}
 
   return (
     <div className="min-h-screen bg-gray-50">

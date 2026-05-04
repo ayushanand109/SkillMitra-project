@@ -59,32 +59,49 @@ export const AuthProvider = ({ children }) => {
 
   // LOGIN
   const login = async (email, password) => {
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        { email, password }
-      );
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/auth/login",
+      { email, password }
+    );
 
-      const { token, user } = response.data;
+    const { token } = response.data;
 
-      localStorage.setItem("skillmitra_token", token);
-      localStorage.setItem("skillmitra_user", JSON.stringify(user));
+    // store token
+    localStorage.setItem("skillmitra_token", token);
 
-      setUser(user);
+    // 🔥 fetch full user (IMPORTANT FIX)
+    const meRes = await axios.get(
+      "http://localhost:5000/api/auth/me",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
 
-      return { success: true };
+    // set full user (with skills)
+    setUser(meRes.data);
 
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || "Login failed"
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // store full user
+    localStorage.setItem(
+      "skillmitra_user",
+      JSON.stringify(meRes.data)
+    );
+
+    return { success: true };
+
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || "Login failed"
+    };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // SIGNUP
   const signup = async (userData) => {
